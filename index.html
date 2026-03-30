@@ -1,0 +1,831 @@
+<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover" />
+  <title>Skin Longevity Lab – Mobile MVP</title>
+  <style>
+    :root {
+      --bg: #f7f1ea;
+      --panel: rgba(255,255,255,0.9);
+      --panel-strong: #fffdfb;
+      --ink: #1f1a17;
+      --muted: #6b625d;
+      --line: #e8ddd3;
+      --brand: #5d7c6d;
+      --brand-dark: #3f5c4f;
+      --accent: #d8bb9f;
+      --ok: #3d7c56;
+      --warn: #a25043;
+      --shadow: 0 18px 40px rgba(48, 36, 28, 0.09);
+      --radius: 22px;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      color: var(--ink);
+      background: linear-gradient(180deg, #fbf7f3 0%, #f2e8dd 100%);
+    }
+    .shell {
+      width: min(1120px, 100%);
+      margin: 0 auto;
+      padding: 18px 14px 32px;
+    }
+    .hero, .layout {
+      display: grid;
+      gap: 18px;
+    }
+    .hero { grid-template-columns: 1.15fr .85fr; }
+    .layout { grid-template-columns: 1.02fr .98fr; margin-top: 18px; }
+    .card {
+      background: var(--panel);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      backdrop-filter: blur(8px);
+    }
+    .hero-main, .hero-side, .panel { padding: 24px; }
+    .hero-main {
+      position: relative;
+      overflow: hidden;
+    }
+    .hero-main::after {
+      content: "";
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      right: -60px;
+      top: -80px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(216,187,159,.35), transparent 65%);
+      pointer-events: none;
+    }
+    .eyebrow {
+      font-size: 12px;
+      letter-spacing: .12em;
+      font-weight: 800;
+      text-transform: uppercase;
+      color: var(--brand-dark);
+      margin-bottom: 12px;
+    }
+    h1, h2, h3, h4, p { margin-top: 0; }
+    h1 {
+      margin-bottom: 12px;
+      font-size: clamp(2.2rem, 6vw, 3.9rem);
+      line-height: .96;
+      letter-spacing: -.05em;
+      max-width: 8.2ch;
+    }
+    h2 { font-size: clamp(1.35rem, 3vw, 2rem); }
+    h3 { font-size: 1.03rem; }
+    .lead {
+      font-size: 1rem;
+      line-height: 1.6;
+      color: var(--muted);
+      max-width: 58ch;
+    }
+    .tiny, .footer-note {
+      font-size: 12px;
+      line-height: 1.55;
+      color: var(--muted);
+    }
+    .metric {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: baseline;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--line);
+    }
+    .metric:last-child { border-bottom: 0; }
+    .metric strong { font-size: 1.1rem; }
+    .stack { display: grid; gap: 16px; }
+    .cta-row, .button-row, .pill-row {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+    button, input, select, textarea {
+      font: inherit;
+    }
+    button {
+      border: 0;
+      border-radius: 999px;
+      padding: 14px 18px;
+      font-weight: 750;
+      cursor: pointer;
+      transition: transform .12s ease, opacity .12s ease;
+    }
+    button:hover { transform: translateY(-1px); }
+    .primary { background: var(--brand); color: white; }
+    .secondary { background: #eee4dc; color: var(--ink); }
+    .ghost { background: white; color: var(--ink); border: 1px solid var(--line); }
+    .upload-zone, .question-block, .score-card, .result-card, .protocol-card, .insight-card, .demo-card {
+      background: rgba(255,255,255,0.76);
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      padding: 16px;
+    }
+    .upload-zone {
+      border-style: dashed;
+      background: rgba(255,255,255,.68);
+    }
+    .preview {
+      margin-top: 14px;
+      border-radius: 16px;
+      border: 1px solid var(--line);
+      background: #efe6dc;
+      min-height: 220px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+    }
+    .preview img { width: 100%; max-height: 360px; object-fit: cover; display: block; }
+    .empty-preview { padding: 24px; text-align: center; color: var(--muted); line-height: 1.55; }
+    input[type="file"] { width: 100%; margin-top: 12px; }
+    .question-grid, .score-grid, .protocol-grid, .demo-grid, .split {
+      display: grid;
+      gap: 12px;
+    }
+    .question-grid { gap: 14px; }
+    .options {
+      display: grid;
+      gap: 9px;
+      grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+    }
+    .option {
+      width: 100%;
+      text-align: left;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      padding: 12px;
+      background: #faf7f4;
+      min-height: 78px;
+    }
+    .option.selected {
+      background: #eef6f0;
+      border-color: var(--brand-dark);
+      box-shadow: inset 0 0 0 1px var(--brand-dark);
+    }
+    .option .label { display: block; font-weight: 750; margin-bottom: 6px; }
+    .option small { color: var(--muted); line-height: 1.42; }
+    .score-grid { grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); }
+    .score-value {
+      font-size: 2rem;
+      font-weight: 800;
+      margin: 8px 0;
+    }
+    .meter {
+      width: 100%;
+      height: 10px;
+      border-radius: 999px;
+      background: #ece2d9;
+      overflow: hidden;
+      margin: 10px 0 8px;
+    }
+    .meter > span {
+      display: block;
+      height: 100%;
+      border-radius: 999px;
+      background: linear-gradient(90deg, var(--accent), var(--brand));
+    }
+    .pill {
+      border-radius: 999px;
+      padding: 8px 12px;
+      border: 1px solid var(--line);
+      background: #f6efe8;
+      font-size: 12px;
+    }
+    .status {
+      border-radius: 16px;
+      padding: 12px 14px;
+      border: 1px solid var(--line);
+      background: #f7f2ec;
+      color: var(--muted);
+      line-height: 1.5;
+      font-size: 14px;
+    }
+    .status.ok { background: #edf7f0; color: #2f6542; border-color: #bdd5c4; }
+    .status.warn { background: #fbefec; color: #7f392f; border-color: #e3b8af; }
+    .protocol-card ul, .insight-card ul, .demo-card ul {
+      margin: 10px 0 0;
+      padding-left: 18px;
+      color: var(--muted);
+      line-height: 1.55;
+    }
+    .demo-grid { grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); }
+    .demo-card.active { border-color: var(--brand-dark); box-shadow: inset 0 0 0 1px var(--brand-dark); }
+    .demo-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 10px;
+    }
+    .demo-avatar {
+      width: 52px;
+      height: 52px;
+      border-radius: 16px;
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      color: white;
+      background: linear-gradient(135deg, #bb8f72, #6b8778);
+    }
+    .demo-actions { margin-top: 12px; }
+    .split { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
+    .mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: 12px; white-space: pre-wrap; word-break: break-word; }
+    .sticky-summary {
+      position: sticky;
+      top: 14px;
+    }
+    @media (max-width: 960px) {
+      .hero, .layout { grid-template-columns: 1fr; }
+      .sticky-summary { position: static; }
+    }
+    @media (max-width: 640px) {
+      .shell { padding: 12px 12px 24px; }
+      .hero-main, .hero-side, .panel { padding: 18px; }
+      .card { border-radius: 20px; }
+      h1 { font-size: 2.25rem; max-width: 7.4ch; }
+      .lead { font-size: .96rem; }
+      .metric { display: grid; gap: 4px; }
+      .cta-row, .button-row { display: grid; grid-template-columns: 1fr; }
+      button { width: 100%; min-height: 50px; }
+      .options, .score-grid, .demo-grid, .split { grid-template-columns: 1fr; }
+      .preview { min-height: 180px; }
+      .score-value { font-size: 1.8rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <section class="hero">
+      <div class="card hero-main">
+        <div class="eyebrow">Mobile MVP · Skin scan + companion logic</div>
+        <h1>Skin Longevity Companion</h1>
+        <p class="lead">
+          Mobile-first Demo für eine Skin-Longevity-App: Foto als Einstieg, kurze Fragen, automatisch berechnete Scores,
+          Companion-Protokoll und drei vorgetestete Beispiel-Scans zum schnellen Vergleichen.
+        </p>
+        <div class="cta-row">
+          <button class="primary" id="jumpToApp">Mobile Demo öffnen</button>
+          <button class="secondary" id="loadStarterDemo">Starter-Demo laden</button>
+        </div>
+      </div>
+      <aside class="card hero-side">
+        <div>
+          <div class="metric"><span>Positionierung</span><strong>Companion-first, scan-second</strong></div>
+          <div class="metric"><span>Zielgruppe</span><strong>Skincare + treatment-aware users</strong></div>
+          <div class="metric"><span>MVP Outcome</span><strong>Scores, Protocol, Vergleiche</strong></div>
+        </div>
+        <div class="tiny">
+          Wichtiger Produktpunkt: Der Scan ist Einstieg und Verlaufstool – nicht medizinische Diagnose. Der eigentliche Wert entsteht
+          durch Guidance, Protokolle, Check-ins und treatment-nahe Begleitung.
+        </div>
+      </aside>
+    </section>
+
+    <section class="card panel stack" style="margin-top:18px;">
+      <div class="eyebrow">Vorgeprüfte Demo-Scans</div>
+      <div style="display:flex;justify-content:space-between;gap:12px;align-items:end;flex-wrap:wrap;">
+        <div>
+          <h2 style="margin-bottom:6px;">3 Beispiel-Scans zum Vergleichen</h2>
+          <div class="tiny">Damit ihr ohne eigene Fotos sofort sehen könnt, wie sich Scores und Protokolle zwischen Profilen unterscheiden.</div>
+        </div>
+      </div>
+      <div class="demo-grid" id="demoGrid"></div>
+      <div class="status ok" id="demoStatus">Demo-Scans bereit. Tippe auf ein Profil, um die App damit automatisch zu füllen.</div>
+    </section>
+
+    <section class="layout" id="appStart">
+      <main class="card panel stack">
+        <div>
+          <h2 style="margin-bottom:8px;">1) Foto & Intake</h2>
+          <div class="upload-zone">
+            <strong>Frontfoto hochladen</strong>
+            <div class="tiny">Am besten neutrales Tageslicht, frontal, ohne starken Filter. Für euren Test reichen alternativ auch die drei Demo-Scans oben.</div>
+            <input id="photoInput" type="file" accept="image/*" />
+            <div class="preview" id="previewBox">
+              <div class="empty-preview">Noch kein Foto geladen.<br>Alternativ einen Demo-Scan oben auswählen.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="question-grid" id="questionMount"></div>
+
+        <div class="button-row">
+          <button class="primary" id="analyzeBtn">Analyse starten</button>
+          <button class="ghost" id="resetBtn">Alles zurücksetzen</button>
+        </div>
+
+        <div class="status" id="statusBox">Bereit. Lade ein Foto hoch oder nutze einen Demo-Scan.</div>
+
+        <div>
+          <h3 style="margin-bottom:8px;">Analyse-Engine</h3>
+          <div class="status ok">Das Modell ist im UI bewusst unsichtbar. Diese Demo nutzt lokale Bildheuristik und kann später über einen Backend-Proxy mit einem Vision-Modell verbunden werden.</div>
+          <div class="footer-note">Für Produktion: serverseitiger Proxy, keine API-Keys im Frontend, Claims bewusst nicht-diagnostisch halten.</div>
+        </div>
+      </main>
+
+      <aside class="card panel stack sticky-summary">
+        <div>
+          <div class="eyebrow">Automatische Auswertung</div>
+          <h2 style="margin-bottom:10px;">2) Scores & Protocol</h2>
+          <div class="score-grid" id="scoreGrid"></div>
+        </div>
+
+        <div class="result-card">
+          <h3>Highlights</h3>
+          <div class="pill-row" id="highlightPills"></div>
+        </div>
+
+        <div class="result-card">
+          <h3>Starter-Protocol</h3>
+          <div class="protocol-grid" id="protocolGrid"></div>
+        </div>
+
+        <div class="split">
+          <div class="insight-card">
+            <h4>Warum diese Scores?</h4>
+            <ul id="reasonList"></ul>
+          </div>
+          <div class="insight-card">
+            <h4>Vergleich & Modellhinweise</h4>
+            <ul id="cloudList"></ul>
+          </div>
+        </div>
+
+        <div class="status mono" id="jsonBox">Noch keine Analyse gelaufen.</div>
+      </aside>
+    </section>
+  </div>
+
+  <script>
+    const questions = [
+      {
+        key: 'skinType',
+        label: 'Wie würdest du deine Haut beschreiben?',
+        options: [
+          { value: 'dry', title: 'Eher trocken', desc: 'Spannt, neigt zu Schuppung oder Tightness.' },
+          { value: 'combo', title: 'Mischhaut', desc: 'T-Zone öliger, Wangen ausgeglichener.' },
+          { value: 'oily', title: 'Ölig', desc: 'Glanz, größere Poren, schneller fettig.' },
+          { value: 'reactive', title: 'Reaktiv / sensibel', desc: 'Rötet oder brennt schnell.' }
+        ]
+      },
+      {
+        key: 'uv',
+        label: 'Wie konsequent ist täglicher SPF 50?',
+        options: [
+          { value: 'daily', title: 'Fast täglich', desc: 'Sehr gute Basis für Photoaging-Prävention.' },
+          { value: 'sometimes', title: 'Mal so, mal so', desc: 'Unregelmäßig, eher situationsabhängig.' },
+          { value: 'rarely', title: 'Selten', desc: 'Nur im Sommer oder fast nie.' }
+        ]
+      },
+      {
+        key: 'actives',
+        label: 'Welche Actives nutzt du bereits?',
+        options: [
+          { value: 'none', title: 'Noch keine', desc: 'Eher Basispflege, noch kein Retinoid/AHA/BHA.' },
+          { value: 'gentle', title: 'Mild', desc: 'Niacinamid, Azelainsäure, Vitamin C oder gelegentliche Säuren.' },
+          { value: 'retinoid', title: 'Retinoid dabei', desc: 'Retinol, Retinal oder Tretinoin im Spiel.' },
+          { value: 'overdoing', title: 'Eher viel auf einmal', desc: 'Mehrere Actives, Haut ist manchmal gereizt.' }
+        ]
+      },
+      {
+        key: 'goal',
+        label: 'Was ist gerade das Hauptziel?',
+        options: [
+          { value: 'prevention', title: 'Prävention & healthy aging', desc: 'Langfristig stabil und gut altern.' },
+          { value: 'tone', title: 'Glow & gleichmäßiger Teint', desc: 'Pigment, Textur, Frische.' },
+          { value: 'calm', title: 'Beruhigen & Barriereschutz', desc: 'Weniger Reizung, mehr Stabilität.' },
+          { value: 'lines', title: 'Linien & Kollagenerhalt', desc: 'Struktur, Falten, Straffheit.' }
+        ]
+      },
+      {
+        key: 'sensitivity',
+        label: 'Wie oft reagiert deine Haut auf neue Produkte?',
+        options: [
+          { value: 'rare', title: 'Selten', desc: 'Haut ist relativ robust.' },
+          { value: 'sometimes', title: 'Manchmal', desc: 'Kommt auf Wirkstoff und Formulierung an.' },
+          { value: 'often', title: 'Oft', desc: 'Brennen, Ziehen oder Rötung kommen schnell.' }
+        ]
+      }
+    ];
+
+    const scoreDefs = [
+      { key: 'longevity', title: 'Skin Longevity', goodHigh: true, desc: 'Gesamtscore für langfristige Hautalterungs-Prävention.' },
+      { key: 'photoaging', title: 'Photoaging Risk', goodHigh: false, desc: 'Wie stark UV/Belastung sichtbare Alterung beschleunigen.' },
+      { key: 'barrier', title: 'Barrier Resilience', goodHigh: true, desc: 'Wie stabil die Hautbarriere aktuell wirkt.' },
+      { key: 'inflammation', title: 'Inflammation Load', goodHigh: false, desc: 'Proxy für Reizung, Rötung und Überpflegerisiko.' },
+      { key: 'consistency', title: 'Protocol Fit', goodHigh: true, desc: 'Wie gut ein einfacher, konsequenter Starter-Plan passt.' }
+    ];
+
+    const demoScans = [
+      {
+        id: 'barrier',
+        name: 'Barrier Reset',
+        short: 'Sensibel & überpflegt',
+        avatar: 'BR',
+        color: 'linear-gradient(135deg,#c89d86,#8b6d67)',
+        answers: { skinType: 'reactive', uv: 'sometimes', actives: 'overdoing', goal: 'calm', sensitivity: 'often' },
+        signals: { brightness: 68, redness: 74, dullness: 34, texture: 33, warmth: 60 },
+        notes: ['Hohe Reaktivität', 'Barrier-first statt mehr Actives', 'Sehr gut für Recovery Companion geeignet']
+      },
+      {
+        id: 'prevention',
+        name: 'Longevity Starter',
+        short: 'Mischhaut & Prävention',
+        avatar: 'LS',
+        color: 'linear-gradient(135deg,#b98365,#5d7c6d)',
+        answers: { skinType: 'combo', uv: 'daily', actives: 'gentle', goal: 'prevention', sensitivity: 'sometimes' },
+        signals: { brightness: 74, redness: 28, dullness: 26, texture: 18, warmth: 44 },
+        notes: ['Gute SPF-Basis', 'Starker Candidate für Subscription + Tracking', 'Scan zeigt eher Maintenance als Rescue']
+      },
+      {
+        id: 'photoaging',
+        name: 'Collagen Preserve',
+        short: 'UV-Risiko & Textur',
+        avatar: 'CP',
+        color: 'linear-gradient(135deg,#b57e66,#6f8a7e)',
+        answers: { skinType: 'dry', uv: 'rarely', actives: 'none', goal: 'lines', sensitivity: 'sometimes' },
+        signals: { brightness: 61, redness: 36, dullness: 39, texture: 42, warmth: 47 },
+        notes: ['Photoaging-Risiko klar erhöht', 'SPF-Compliance wäre größter Hebel', 'Retinoid-Starter sinnvoll nach Barrier-Basis']
+      }
+    ];
+
+    const answers = {};
+    let imageData = null;
+    let imagePreviewUrl = null;
+    let activeDemoId = null;
+
+    const questionMount = document.getElementById('questionMount');
+    const previewBox = document.getElementById('previewBox');
+    const statusBox = document.getElementById('statusBox');
+    const scoreGrid = document.getElementById('scoreGrid');
+    const protocolGrid = document.getElementById('protocolGrid');
+    const reasonList = document.getElementById('reasonList');
+    const cloudList = document.getElementById('cloudList');
+    const highlightPills = document.getElementById('highlightPills');
+    const jsonBox = document.getElementById('jsonBox');
+    const demoGrid = document.getElementById('demoGrid');
+
+    const appConfig = { proxyUrl: '' };
+
+    function clamp(value, min = 0, max = 100) {
+      return Math.max(min, Math.min(max, Math.round(value)));
+    }
+
+    function renderQuestions() {
+      questionMount.innerHTML = '';
+      questions.forEach(question => {
+        const block = document.createElement('div');
+        block.className = 'question-block';
+        block.innerHTML = `<h4>${question.label}</h4>`;
+        const wrap = document.createElement('div');
+        wrap.className = 'options';
+        question.options.forEach(opt => {
+          const btn = document.createElement('button');
+          btn.type = 'button';
+          btn.className = 'option' + (answers[question.key] === opt.value ? ' selected' : '');
+          btn.innerHTML = `<span class="label">${opt.title}</span><small>${opt.desc}</small>`;
+          btn.onclick = () => {
+            answers[question.key] = opt.value;
+            activeDemoId = null;
+            renderQuestions();
+            renderDemoScans();
+          };
+          wrap.appendChild(btn);
+        });
+        block.appendChild(wrap);
+        questionMount.appendChild(block);
+      });
+    }
+
+    function renderEmptyState() {
+      scoreGrid.innerHTML = scoreDefs.map(def => `
+        <div class="score-card">
+          <div class="tiny">${def.title}</div>
+          <div class="score-value">—</div>
+          <div class="meter"><span style="width:0%"></span></div>
+          <div class="tiny">${def.desc}</div>
+        </div>
+      `).join('');
+      protocolGrid.innerHTML = '<div class="protocol-card"><strong>Noch kein Protokoll.</strong><div class="tiny" style="margin-top:8px;">Starte eine Analyse oder wähle oben einen Demo-Scan.</div></div>';
+      reasonList.innerHTML = '<li>Scan + Intake werden zusammengeführt.</li>';
+      cloudList.innerHTML = '<li>Noch kein Vergleich geladen.</li>';
+      highlightPills.innerHTML = '<div class="pill">Warte auf Analyse</div>';
+      jsonBox.textContent = 'Noch keine Analyse gelaufen.';
+    }
+
+    function renderDemoScans() {
+      demoGrid.innerHTML = demoScans.map(scan => `
+        <div class="demo-card ${activeDemoId === scan.id ? 'active' : ''}">
+          <div class="demo-meta">
+            <div style="display:flex;gap:12px;align-items:center;">
+              <div class="demo-avatar" style="background:${scan.color};">${scan.avatar}</div>
+              <div>
+                <strong>${scan.name}</strong>
+                <div class="tiny">${scan.short}</div>
+              </div>
+            </div>
+            <div class="pill">3-Minuten-Case</div>
+          </div>
+          <ul>${scan.notes.map(note => `<li>${note}</li>`).join('')}</ul>
+          <div class="demo-actions"><button class="secondary" data-demo-id="${scan.id}">Demo laden</button></div>
+        </div>
+      `).join('');
+      demoGrid.querySelectorAll('button[data-demo-id]').forEach(btn => {
+        btn.addEventListener('click', () => loadDemoScan(btn.dataset.demoId));
+      });
+    }
+
+    function updatePreview(file) {
+      if (!file) {
+        if (!activeDemoId) previewBox.innerHTML = '<div class="empty-preview">Noch kein Foto geladen.<br>Alternativ einen Demo-Scan oben auswählen.</div>';
+        imageData = null;
+        return;
+      }
+      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+      imagePreviewUrl = URL.createObjectURL(file);
+      previewBox.innerHTML = `<img alt="Uploaded face" src="${imagePreviewUrl}" />`;
+      const reader = new FileReader();
+      reader.onload = () => imageData = reader.result;
+      reader.readAsDataURL(file);
+    }
+
+    async function extractImageSignals(dataUrl) {
+      return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => {
+          const canvas = document.createElement('canvas');
+          const maxSide = 480;
+          const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
+          canvas.width = Math.round(img.width * scale);
+          canvas.height = Math.round(img.height * scale);
+          const ctx = canvas.getContext('2d', { willReadFrequently: true });
+          ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+          const { data } = ctx.getImageData(0, 0, canvas.width, canvas.height);
+          let sumR = 0, sumG = 0, sumB = 0, contrast = 0, pixels = 0;
+          let prevLuma = null;
+          for (let i = 0; i < data.length; i += 4) {
+            const r = data[i], g = data[i + 1], b = data[i + 2];
+            const luma = 0.2126 * r + 0.7152 * g + 0.0722 * b;
+            sumR += r; sumG += g; sumB += b; pixels++;
+            if (prevLuma !== null) contrast += Math.abs(luma - prevLuma);
+            prevLuma = luma;
+          }
+          const avgR = sumR / pixels;
+          const avgG = sumG / pixels;
+          const avgB = sumB / pixels;
+          const brightness = (avgR + avgG + avgB) / 3;
+          resolve({
+            brightness: clamp(brightness / 255 * 100),
+            redness: clamp(((avgR - (avgG + avgB) / 2) + 30) * 1.7),
+            dullness: clamp(100 - brightness / 255 * 100),
+            texture: clamp((contrast / pixels) * 8.5),
+            warmth: clamp(((avgR - avgB) + 20) * 2.2)
+          });
+        };
+        img.onerror = reject;
+        img.src = dataUrl;
+      });
+    }
+
+    function computeLocalScores(signals) {
+      const uvPenalty = { daily: 6, sometimes: 20, rarely: 34 }[answers.uv || 'sometimes'];
+      const sensitivityPenalty = { rare: 4, sometimes: 12, often: 24 }[answers.sensitivity || 'sometimes'];
+      const activePenalty = { none: 4, gentle: -4, retinoid: -10, overdoing: 18 }[answers.actives || 'none'];
+      const skinTypePenalty = { dry: 10, combo: 6, oily: 8, reactive: 18 }[answers.skinType || 'combo'];
+      const goalBoost = { prevention: 6, tone: 3, calm: 5, lines: 4 }[answers.goal || 'prevention'];
+
+      const photoaging = clamp(18 + uvPenalty + signals.dullness * 0.28 + signals.texture * 0.18 + (answers.goal === 'lines' ? 6 : 0));
+      const barrier = clamp(84 - sensitivityPenalty - Math.max(0, signals.redness - 24) * 0.55 - Math.max(0, activePenalty) - (answers.skinType === 'dry' ? 8 : 0) + (answers.goal === 'calm' ? 4 : 0));
+      const inflammation = clamp(12 + signals.redness * 0.45 + sensitivityPenalty * 0.6 + Math.max(0, activePenalty) * 0.7 - (answers.actives === 'gentle' ? 4 : 0));
+      const consistency = clamp(76 + goalBoost - (answers.actives === 'overdoing' ? 16 : 0) - (answers.uv === 'rarely' ? 10 : 0) - (answers.sensitivity === 'often' ? 6 : 0));
+      const longevity = clamp(100 - photoaging * 0.42 - inflammation * 0.22 + barrier * 0.33 + consistency * 0.18 - skinTypePenalty * 0.2);
+      return { longevity, photoaging, barrier, inflammation, consistency };
+    }
+
+    function chooseProtocol(scores) {
+      if (scores.barrier < 52 || answers.goal === 'calm' || answers.sensitivity === 'often') {
+        return {
+          title: 'Barrier-first Reset',
+          highlights: ['Barrier', 'weniger Reizlast', 'Recovery'],
+          cards: [
+            { title: 'Morgens', items: ['Optional milder Cleanser', 'Barrier-Serum oder hydratisierende Essence', 'Unparfümierte Creme', 'SPF 50 jeden Tag'] },
+            { title: 'Abends', items: ['Sanfte Reinigung', 'Barrier Cream', 'Keine aggressive Rotation aus Säuren + Retinoiden gleichzeitig'] },
+            { title: 'Companion-Logik', items: ['Wenn irritiert: nur Recovery-Modus', 'Actives 7–14 Tage runterfahren', 'Dann langsam wieder einschleichen'] }
+          ]
+        };
+      }
+      if (scores.photoaging > 58 || answers.goal === 'lines') {
+        return {
+          title: 'Collagen Preservation Protocol',
+          highlights: ['SPF', 'Retinoid', 'Textur'],
+          cards: [
+            { title: 'Morgens', items: ['Antioxidans optional', 'Moisturizer', 'SPF 50 daily – non-negotiable'] },
+            { title: 'Abends', items: ['Retinoid-Starter 2–3x/Woche', 'Barrier Cream an Off-Nights', 'Keine unnötige Produktüberladung'] },
+            { title: 'Treatment Companion', items: ['Vor Laser/Microneedling Actives pausieren', 'Recovery-Modus danach', 'Re-Scan nach 4 Wochen'] }
+          ]
+        };
+      }
+      return {
+        title: 'Longevity Starter Protocol',
+        highlights: ['Prävention', 'gleichmäßiger Teint', 'Maintenance'],
+        cards: [
+          { title: 'Morgens', items: ['Milde Reinigung nach Bedarf', 'Leichtes antioxidatives oder Niacinamid-Serum', 'Moisturizer', 'SPF 50'] },
+          { title: 'Abends', items: ['Cleanser', 'Retinal oder Azelainsäure je nach Verträglichkeit', 'Barrier-supportive cream'] },
+          { title: 'System', items: ['4 Kernprodukte reichen', 'Weniger Produktwechsel', 'Monatlicher Foto-Check + Anpassung'] }
+        ]
+      };
+    }
+
+    function buildReasons(signals, scores, sourceLabel) {
+      const reasons = [];
+      reasons.push(`SPF-Verhalten (${answers.uv || '—'}) beeinflusst den Photoaging-Score stark.`);
+      reasons.push(`Bildsignale: Rötung ≈ ${signals.redness}/100, Textur ≈ ${signals.texture}/100, Dullness ≈ ${signals.dullness}/100.`);
+      if (answers.actives === 'overdoing') reasons.push('Mehrere Actives gleichzeitig erhöhen bewusst das Irritations- und Barriererisiko.');
+      if (answers.sensitivity === 'often') reasons.push('Hohe Reaktivität verschiebt die Empfehlung Richtung Barrier-first und Recovery.');
+      if (scores.photoaging > 55) reasons.push('Das Profil zeigt klaren Präventionsbedarf bei UV/Textur statt nur Glow-Optimierung.');
+      if (sourceLabel) reasons.push(`Quelle: ${sourceLabel}.`);
+      return reasons.slice(0, 5);
+    }
+
+    function renderScores(scores) {
+      scoreGrid.innerHTML = scoreDefs.map(def => {
+        const value = scores[def.key];
+        const tone = def.goodHigh ? (value >= 70 ? 'ok' : value >= 50 ? '' : 'warn') : (value <= 35 ? 'ok' : value <= 55 ? '' : 'warn');
+        const label = def.goodHigh ? (value >= 70 ? 'stark' : value >= 50 ? 'mittel' : 'fragil') : (value <= 35 ? 'niedrig' : value <= 55 ? 'mittel' : 'erhöht');
+        return `
+          <div class="score-card">
+            <div class="tiny">${def.title}</div>
+            <div class="score-value">${value}</div>
+            <div class="meter"><span style="width:${value}%"></span></div>
+            <div class="status ${tone}">${label}</div>
+            <div class="tiny" style="margin-top:8px;">${def.desc}</div>
+          </div>
+        `;
+      }).join('');
+    }
+
+    function renderProtocol(protocol) {
+      protocolGrid.innerHTML = protocol.cards.map(card => `
+        <div class="protocol-card">
+          <strong>${card.title}</strong>
+          <ul>${card.items.map(item => `<li>${item}</li>`).join('')}</ul>
+        </div>
+      `).join('');
+      highlightPills.innerHTML = protocol.highlights.map(item => `<div class="pill">${item}</div>`).join('');
+      highlightPills.innerHTML += `<div class="pill">${protocol.title}</div>`;
+    }
+
+    function renderReasons(reasons, comparisonLines) {
+      reasonList.innerHTML = reasons.map(item => `<li>${item}</li>`).join('');
+      cloudList.innerHTML = comparisonLines.map(item => `<li>${item}</li>`).join('');
+    }
+
+    async function callCloudModel(dataUrl) {
+      if (!appConfig.proxyUrl) return null;
+      const res = await fetch(appConfig.proxyUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: dataUrl })
+      });
+      if (!res.ok) throw new Error('Proxy-Analyse fehlgeschlagen: ' + res.status);
+      return await res.json();
+    }
+
+    function compareAgainstDemoSet(scores, sourceId) {
+      const summaries = demoScans.map(scan => {
+        const demoScores = computeScoresForDemo(scan);
+        const distance = Math.abs(scores.photoaging - demoScores.photoaging) + Math.abs(scores.barrier - demoScores.barrier) + Math.abs(scores.inflammation - demoScores.inflammation);
+        return { scan, demoScores, distance };
+      }).sort((a, b) => a.distance - b.distance);
+      const nearest = summaries[0];
+      const lines = [
+        `Nächster Vergleichsfall: ${nearest.scan.name} (${nearest.scan.short}).`,
+        `Vergleich: Photoaging ${scores.photoaging} vs ${nearest.demoScores.photoaging}, Barrier ${scores.barrier} vs ${nearest.demoScores.barrier}.`,
+        'Für Produktion sollte hier später ein echter Verlauf und Benchmarking-Layer folgen.'
+      ];
+      if (sourceId) lines.unshift(`Aktiver Demo-Case: ${demoScans.find(x => x.id === sourceId)?.name}.`);
+      return lines;
+    }
+
+    function computeScoresForDemo(scan) {
+      const prevAnswers = { ...answers };
+      Object.assign(answers, scan.answers);
+      const scores = computeLocalScores(scan.signals);
+      Object.keys(answers).forEach(k => delete answers[k]);
+      Object.assign(answers, prevAnswers);
+      return scores;
+    }
+
+    function applyAnalysis(signals, sourceLabel = 'Custom upload', sourceId = null) {
+      const scores = computeLocalScores(signals);
+      const protocol = chooseProtocol(scores);
+      const reasons = buildReasons(signals, scores, sourceLabel);
+      const comparisonLines = compareAgainstDemoSet(scores, sourceId);
+      renderScores(scores);
+      renderProtocol(protocol);
+      renderReasons(reasons, comparisonLines);
+      jsonBox.className = 'status ok mono';
+      jsonBox.textContent = JSON.stringify({ source: sourceLabel, signals, scores, protocol: protocol.title }, null, 2);
+      statusBox.className = 'status ok';
+      statusBox.textContent = 'Analyse fertig. Scores, Companion-Protocol und Vergleich wurden aktualisiert.';
+    }
+
+    async function runAnalysis() {
+      const missing = questions.filter(q => !answers[q.key]);
+      if (!imageData && !activeDemoId) {
+        statusBox.className = 'status warn';
+        statusBox.textContent = 'Bitte zuerst ein Foto hochladen oder einen Demo-Scan laden.';
+        return;
+      }
+      if (missing.length) {
+        statusBox.className = 'status warn';
+        statusBox.textContent = 'Bitte beantworte noch alle Intake-Fragen.';
+        return;
+      }
+      statusBox.className = 'status';
+      statusBox.textContent = 'Analysiere Bildsignale und berechne Scores …';
+
+      try {
+        let signals;
+        let label = 'Custom upload';
+        if (activeDemoId) {
+          const demo = demoScans.find(item => item.id === activeDemoId);
+          signals = demo.signals;
+          label = `Demo scan: ${demo.name}`;
+        } else {
+          signals = await extractImageSignals(imageData);
+        }
+        let cloud = null;
+        try { cloud = await callCloudModel(imageData); } catch (_) {}
+        if (cloud && Number.isFinite(cloud.redness)) signals = {
+          ...signals,
+          redness: clamp((signals.redness * .75) + (cloud.redness * .25)),
+          texture: clamp((signals.texture * .75) + ((cloud.texture || signals.texture) * .25))
+        };
+        applyAnalysis(signals, label, activeDemoId);
+      } catch (err) {
+        statusBox.className = 'status warn';
+        statusBox.textContent = 'Analyse fehlgeschlagen: ' + err.message;
+      }
+    }
+
+    function loadDemoScan(id) {
+      const demo = demoScans.find(item => item.id === id);
+      if (!demo) return;
+      activeDemoId = id;
+      Object.keys(answers).forEach(key => delete answers[key]);
+      Object.assign(answers, demo.answers);
+      document.getElementById('photoInput').value = '';
+      imageData = null;
+      previewBox.innerHTML = `<div class="empty-preview"><strong>${demo.name}</strong><br>${demo.short}<br><br>Dieser vorkonfigurierte Demo-Scan simuliert einen realistischen Case und zeigt Vergleichswerte ohne Nutzerfoto.</div>`;
+      renderQuestions();
+      renderDemoScans();
+      applyAnalysis(demo.signals, `Demo scan: ${demo.name}`, demo.id);
+      statusBox.className = 'status ok';
+      statusBox.textContent = `${demo.name} geladen. Das ist einer von drei vorgetesteten Vergleichsfällen.`;
+      document.getElementById('appStart').scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }
+
+    function loadStarterDemo() {
+      loadDemoScan('prevention');
+    }
+
+    function resetAll() {
+      Object.keys(answers).forEach(key => delete answers[key]);
+      activeDemoId = null;
+      document.getElementById('photoInput').value = '';
+      imageData = null;
+      if (imagePreviewUrl) URL.revokeObjectURL(imagePreviewUrl);
+      imagePreviewUrl = null;
+      previewBox.innerHTML = '<div class="empty-preview">Noch kein Foto geladen.<br>Alternativ einen Demo-Scan oben auswählen.</div>';
+      renderQuestions();
+      renderDemoScans();
+      renderEmptyState();
+      statusBox.className = 'status';
+      statusBox.textContent = 'Zurückgesetzt. Lade ein Foto hoch oder nutze einen Demo-Scan.';
+    }
+
+    document.getElementById('photoInput').addEventListener('change', event => {
+      activeDemoId = null;
+      renderDemoScans();
+      updatePreview(event.target.files?.[0]);
+    });
+    document.getElementById('analyzeBtn').addEventListener('click', runAnalysis);
+    document.getElementById('resetBtn').addEventListener('click', resetAll);
+    document.getElementById('jumpToApp').addEventListener('click', () => document.getElementById('appStart').scrollIntoView({ behavior: 'smooth' }));
+    document.getElementById('loadStarterDemo').addEventListener('click', loadStarterDemo);
+
+    renderQuestions();
+    renderDemoScans();
+    renderEmptyState();
+  </script>
+</body>
+</html>
